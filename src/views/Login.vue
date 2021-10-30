@@ -114,14 +114,14 @@
 
 <script>
   export default {
-    name: 'Home',
+    name: 'Login',
     data: () => ({
       expandOnHover: false,
       step:1
     }),
     methods:{
       sigIn(){
-        this.$router.push('/user');
+        this.$router.push('/users');
       }
     }
   }

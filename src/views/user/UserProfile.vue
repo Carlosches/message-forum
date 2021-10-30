@@ -1,179 +1,55 @@
 <template>
-  <v-container
-    id="user-profile"
-    fluid
-    tag="section"
-  >
-    <v-row justify="center">
-      <v-col
-        cols="12"
-        md="8"
-      >
-        <base-material-card>
-          <template v-slot:heading>
-            <div class="display-2 font-weight-light">
-              Edit Profile
-            </div>
-
-            <div class="subtitle-1 font-weight-light">
-              Complete your profile
-            </div>
-          </template>
-
-          <v-form>
-            <v-container class="py-0">
+<v-container fluid>
+    <v-row style="height: 70vh;" class="text-center" align="center" justify="center">
+      <v-col>
+        <div class="d-inline-flex justify-center">
+          <v-card class="pa-5" outlined>
+            <v-container fluid>
+              <v-row align="center" justify="center">
+                  <div slot="activator">
+                    <v-avatar class="avatar-profile ml-1 justify-center" size="105">
+                      <v-img src="https://randomuser.me/api/portraits/women/85.jpg"></v-img>
+                    </v-avatar>
+                  </div>
+              </v-row>
               <v-row>
-                <v-col
-                  cols="12"
-                  md="4"
-                >
-                  <v-text-field
-                    label="Company (disabled)"
-                    disabled
-                  />
-                </v-col>
-
-                <v-col
-                  cols="12"
-                  md="4"
-                >
-                  <v-text-field
-                    class="purple-input"
-                    label="User Name"
-                  />
-                </v-col>
-
-                <v-col
-                  cols="12"
-                  md="4"
-                >
-                  <v-text-field
-                    label="Email Address"
-                    class="purple-input"
-                  />
-                </v-col>
-
-                <v-col
-                  cols="12"
-                  md="6"
-                >
-                  <v-text-field
-                    label="First Name"
-                    class="purple-input"
-                  />
-                </v-col>
-
-                <v-col
-                  cols="12"
-                  md="6"
-                >
-                  <v-text-field
-                    label="Last Name"
-                    class="purple-input"
-                  />
-                </v-col>
-
-                <v-col cols="12">
-                  <v-text-field
-                    label="Adress"
-                    class="purple-input"
-                  />
-                </v-col>
-
-                <v-col
-                  cols="12"
-                  md="4"
-                >
-                  <v-text-field
-                    label="City"
-                    class="purple-input"
-                  />
-                </v-col>
-
-                <v-col
-                  cols="12"
-                  md="4"
-                >
-                  <v-text-field
-                    label="Country"
-                    class="purple-input"
-                  />
-                </v-col>
-
-                <v-col
-                  cols="12"
-                  md="4"
-                >
-                  <v-text-field
-                    class="purple-input"
-                    label="Postal Code"
-                    type="number"
-                  />
-                </v-col>
-
-                <v-col cols="12">
-                  <v-textarea
-                    class="purple-input"
-                    label="About Me"
-                    value="Lorem ipsum dolor sit amet, consectetur adipiscing elit."
-                  />
-                </v-col>
-
-                <v-col
-                  cols="12"
-                  class="text-right"
-                >
-                  <v-btn
-                    color="success"
-                    class="mr-0"
-                  >
-                    Update Profile
-                  </v-btn>
+                <v-col>
+                  <!--<h2 class="text-center">{{ this.$store.state.user.firstName }} {{ this.$store.state.user.lastName }}</h2>-->
+                  <h2 class="text-center"> Sandra Adams </h2>
                 </v-col>
               </v-row>
+              <v-row align="center" justify="center">
+                <v-chip @click="editProfile" small>
+                  Edit profile <v-icon class="icon ml-2" x-small>fa-pen</v-icon>
+                </v-chip>
+              </v-row>
+              <v-divider class="my-7"/>
+              <v-row align="center" justify="center">
+                  <p class="mb-1">
+                    <!--<b>Username:</b> {{ this.$store.state.user.username }}<br>
+                    <b>Automation Token:</b> {{ this.$store.state.user.details.automationToken }}-->
+                    <b>Username:</b> sand<br>
+                    <b>email:</b> san2@gmail.com
+
+                  </p>
+              </v-row>
             </v-container>
-          </v-form>
-        </base-material-card>
-      </v-col>
-
-      <v-col
-        cols="12"
-        md="4"
-      >
-        <base-material-card
-          class="v-card-profile"
-          avatar="https://demos.creative-tim.com/vue-material-dashboard/img/marc.aba54d65.jpg"
-        >
-          <v-card-text class="text-center">
-            <h6 class="display-1 mb-1 grey--text">
-              CEO / CO-FOUNDER
-            </h6>
-
-            <h4 class="display-2 font-weight-light mb-3 black--text">
-              Alec Thompson
-            </h4>
-
-            <p class="font-weight-light grey--text">
-              Don't be scared of the truth because we need to restart the human foundation in truth And I love you like Kanye loves Kanye I love Rick Owens’ bed design but the back is...
-            </p>
-
-            <v-btn
-              color="success"
-              rounded
-              class="mr-0"
-            >
-              Follow
-            </v-btn>
-          </v-card-text>
-        </base-material-card>
-      </v-col>
+          </v-card>
+           </div>
+        </v-col>
     </v-row>
-  </v-container>
+</v-container>
+ 
 </template>
-
 <script>
   export default {
     name:"UserProfile"
     //
   }
 </script>
+<style>
+.center-div{
+  margin-left: 80px;
+  text-align: center;
+}
+</style>
