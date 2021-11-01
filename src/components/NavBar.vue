@@ -1,6 +1,6 @@
  <template>
   <div>
-    <v-card>
+    <v-card  v-if="user.loggedIn">
       <v-navigation-drawer expand-on-hover fixed permanent  >
         <v-list>
           <v-list-item class="px-2" link @click="goToProfile()">
@@ -42,6 +42,12 @@
             </v-list-item-icon>
             <v-list-item-title>Mis mensajes</v-list-item-title>
           </v-list-item>
+          <v-list-item @click="singOutUser()">
+            <v-list-item-icon>
+              <v-icon>mdi-logout </v-icon>
+            </v-list-item-icon>
+            <v-list-item-title>Salir</v-list-item-title>
+          </v-list-item>
         </v-list>
       </v-navigation-drawer>
     </v-card>
@@ -50,8 +56,17 @@
 
 
 <script>
+
+import { mapGetters } from "vuex";
+import { getAuth, signOut } from "firebase/auth";
 export default {
     name:'NavBar',
+    computed:{
+      // map `this.user` to `this.$store.getters.user`
+      ...mapGetters({
+        user: "user"
+      }),
+    },
     data(){
         return {
 
@@ -63,7 +78,15 @@ export default {
         },
         goToProfile(){
             this.$router.push('/profile')
-        }
+        },
+        singOutUser(){
+        const auth = getAuth();
+        signOut(auth).then(() => {
+          this.$router.push("/");
+        }).catch((error) => {
+          this.error = error.message;
+        });
+      }
     }
 }
 </script>

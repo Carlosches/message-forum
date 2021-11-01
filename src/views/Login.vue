@@ -18,6 +18,7 @@
                             prepend-icon="mdi-email"
                             type="text"
                             color="blue lighten-3"
+                            v-model="userToLogIn.email"
                           />
 
                           <v-text-field
@@ -27,6 +28,7 @@
                             prepend-icon="mdi-lock"
                             type="password"
                             color="blue lighten-3"
+                            v-model="userToLogIn.password"
                           />
                         </v-form>
                       </v-card-text>
@@ -71,6 +73,7 @@
                             prepend-icon="mdi-account"
                             type="text"
                             color="teal accent-3"
+                            v-model="userToRegister.name"
                           />
                           <v-text-field
                             label="Apellido"
@@ -78,6 +81,7 @@
                             prepend-icon="mdi-account-details-outline "
                             type="text"
                             color="teal accent-3"
+                            v-model="userToRegister.lastName"
                           />
                           <v-text-field
                             label="correo"
@@ -85,6 +89,7 @@
                             prepend-icon="mdi-email"
                             type="text"
                             color="teal accent-3"
+                            v-model="userToRegister.email"
                           />
 
                           <v-text-field
@@ -94,11 +99,12 @@
                             prepend-icon="mdi-lock"
                             type="password"
                             color="teal accent-3"
+                            v-model="userToRegister.password"
                           />
                         </v-form>
                       </v-card-text>
                       <div class="text-center mt-n5">
-                        <v-btn rounded color="blue lighten-2 mb-4" dark>Registrarse</v-btn>
+                        <v-btn rounded color="blue lighten-2 mb-4" dark @click="singUp()">Registrarse</v-btn>
                       </div>
                     </v-col>
                   </v-row>
@@ -113,16 +119,69 @@
 </template>
 
 <script>
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword  } from "firebase/auth";
+import { getFirestore } from "firebase/firestore"
+import { setDoc , doc} from "firebase/firestore";
+
+
   export default {
     name: 'Login',
     data: () => ({
       expandOnHover: false,
-      step:1
+      step:1,
+      userToRegister:{
+        name: '',
+        lastName: '',
+        email: '',
+        password:'',
+      },
+      userToLogIn:{
+        email: '',
+        password:'',
+      }
     }),
     methods:{
       sigIn(){
-        this.$router.push('/users');
-      }
+        const auth = getAuth();
+        signInWithEmailAndPassword(auth, this.userToLogIn.email, this.userToLogIn.password)
+          .then((userCredential) => {
+            // Signed in
+            const user = userCredential.user;
+            console.log(user);
+            this.$router.push('/users');
+            // ...
+          })
+          .catch((error) => {
+            this.error = error.message;
+          });
+      },
+      singUp(){
+        const auth = getAuth();
+        createUserWithEmailAndPassword(auth, this.userToRegister.email, this.userToRegister.password)
+          .then((userCredential) => {
+            // Signed in
+            const user = userCredential.user;
+            console.log(user);
+            const db = getFirestore();
+          
+              setDoc(doc(db, "users", user.uid), {
+                id : user.uid,
+                name : this.userToRegister.name,
+                lastName : this.userToRegister.lastName,
+                email : this.userToRegister.email
+              }).then(()=>{
+                this.$router.push('/users');
+              }).catch((error)=>{
+                  this.error = error.message;
+              });
+              
+           
+          })
+          .catch((error) => {
+            this.error = error.message;
+          });
+        
+      },
     }
   }
 </script>

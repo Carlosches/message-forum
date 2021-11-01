@@ -3,7 +3,7 @@
     <v-row style="height: 70vh;" class="text-center" align="center" justify="center">
       <v-col>
         <div class="d-inline-flex justify-center">
-          <v-card class="pa-5" outlined>
+          <v-card v-if="user" class="pa-5" outlined>
             <v-container fluid>
               <v-row align="center" justify="center">
                   <div slot="activator">
@@ -42,10 +42,19 @@
  
 </template>
 <script>
+
+
   export default {
-    name:"UserProfile"
-    //
+    name:"UserProfile",
+    
+    data: () =>({
+
+    }),
+    methods:{
+      
+    }
   }
+
 </script>
 <style>
 .center-div{

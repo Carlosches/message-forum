@@ -1,7 +1,7 @@
 <template>
 <div class="center-div mt-10">
         <v-row>
-          <v-card class="section-card px-5 ml-16" width="93vw" outlined>
+          <v-card v-if="user.loggedIn" class="section-card px-5 ml-16" width="93vw" outlined>
             <v-card-title>
               <v-spacer/>
               <v-text-field
@@ -160,8 +160,19 @@
 </template>
 
 <script>
+
+import { mapGetters } from "vuex";
 export default {
     name:'UsersList',
+     computed: {
+      formTitle () {
+        return this.editedIndex === -1 ? 'Añadir usuario' : 'Editar usuario'
+      },
+      // map `this.user` to `this.$store.getters.user`
+      ...mapGetters({
+        user: "user"
+      }),
+     },    
     data () {
       return {
         search: '',
@@ -291,12 +302,6 @@ export default {
         ],
       }
     },
-    computed: {
-      formTitle () {
-        return this.editedIndex === -1 ? 'Añadir usuario' : 'Editar usuario'
-      },
-    },
-
     watch: {
       dialog (val) {
         val || this.close()
@@ -352,6 +357,7 @@ export default {
         }
         this.close()
       },
+      
     },
   }
 </script>

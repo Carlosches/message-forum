@@ -1,8 +1,9 @@
-import Vue from 'vue'
-import Router from 'vue-router'
-import Login from './views/Login'
-import UserProfile from './views/user/UserProfile'
-import UsersList from './views/UsersList'
+import Vue from 'vue';
+import Router from 'vue-router';
+import Login from './views/Login';
+import UserProfile from './views/user/UserProfile';
+import UsersList from './views/UsersList';
+
 
 Vue.use(Router)
 
@@ -23,9 +24,9 @@ export default new Router({
     {
       path:'/users',
       name: 'users-list',
-      component: UsersList
+      component: UsersList,
+      
     },
   ]
-     
   
 })
