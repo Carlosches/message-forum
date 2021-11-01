@@ -46,10 +46,10 @@
                   <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-btn color="blue darken-1" text @click="close">
-                      Cancel
+                      Cancelar
                     </v-btn>
                     <v-btn color="blue darken-1" text @click="save">
-                      Save
+                      Guardar
                     </v-btn>
                   </v-card-actions>
                 </v-card>
@@ -57,7 +57,7 @@
               <v-dialog v-model="dialogDelete" max-width="500px">
                 <v-card>
                   <v-card-title class="text-h5"
-                    >¿Está seguro de eliminar este usuario?</v-card-title
+                    >Desea eliminar este mensaje?</v-card-title
                   >
                   <v-card-actions>
                     <v-spacer></v-spacer>
@@ -65,7 +65,7 @@
                       >Cancelar</v-btn
                     >
                     <v-btn color="blue darken-1" text @click="deleteItemConfirm"
-                      >Sí</v-btn
+                      >OK</v-btn
                     >
                     <v-spacer></v-spacer>
                   </v-card-actions>
@@ -73,8 +73,8 @@
               </v-dialog>
             </v-toolbar>
           </template>
-          <template v-slot:item.actions="{ item }">
-            <v-icon small class="mr-2" @click="editItem(item)">
+          <template v-slot:[`item.actions`]="{ item }">
+            <v-icon small class="mr-2" v-model="dialog" @click="editItem(item)">
               mdi-pencil
             </v-icon>
             <v-icon small @click="deleteItem(item)"> mdi-delete </v-icon>
@@ -122,6 +122,8 @@ export default {
   data() {
     return {
       search: "",
+      dialog: false,
+      dialogDelete: false,
       headers: [
         {
           text: "Mensaje",
@@ -131,19 +133,23 @@ export default {
         { text: "Comenzado por", value: "userName" },
         { text: "Última respuesta por", value: "lastResponse" },
         { text: "No Respuestas", value: "noMessages" },
+        { text: "Acciones", value: "actions" },
+        { text: "Id", value: "id", align: " d-none" },
       ],
       editedIndex: -1,
       editedItem: {
+        id: "",
         body: "",
-        lastName: "",
-        email: "",
-        validUntil: "",
+        userName: "",
+        lastResponse: "",
+        noMessages: "",
       },
       defaultItem: {
-        name: "",
-        lastName: "",
-        email: "",
-        validUntil: "",
+        id: "",
+        body: "",
+        userName: "",
+        lastResponse: "",
+        noMessages: "",
       },
       validUntilDate: new Date(
         Date.now() - new Date().getTimezoneOffset() * 60000
@@ -180,8 +186,6 @@ export default {
                 const nombre_usuario =
                   userr.data().name + " " + userr.data().lastName;
 
-                console.log(element.data().replyMessages.length);
-
                 let lastResponseId = "Sin respuestas";
 
                 if (element.data().replyMessages.length > 0) {
@@ -199,22 +203,27 @@ export default {
                       getDoc(docc(db, "users", userr2Id))
                         .then((userr2) => {
                           const message = {
+                            id: element.data().id,
                             body: element.data().body,
                             userName: nombre_usuario,
                             lastResponse:
                               userr2.data().name + " " + userr2.data().lastName,
                             noMessages: element.data().replyMessages.length,
+                            posted: element.data().createdAt,
                           };
+                          console.log(message.id);
 
                           this.users.push(message);
                         })
                         .catch();
                     } else {
                       const message = {
+                        id: element.data().id,
                         body: element.data().body,
                         userName: nombre_usuario,
                         lastResponse: "--",
                         noMessages: element.data().replyMessages.length,
+                        posted: element.data().createdAt,
                       };
 
                       this.users.push(message);
@@ -229,19 +238,23 @@ export default {
     },
 
     editItem(item) {
-      this.editedIndex = this.desserts.indexOf(item);
-      this.editedItem = Object.assign({}, item);
+      console.log(item);
+      this.editedIndex = this.users.indexOf(item);
+      //console.log("index " + this.users[this.editedIndex]);
+      this.editedItem = this.users[this.editedIndex];
       this.dialog = true;
+      console.log(this.users);
+      //this.save();
     },
 
     deleteItem(item) {
-      this.editedIndex = this.desserts.indexOf(item);
-      this.editedItem = Object.assign({}, item);
+      this.editedIndex = this.users.indexOf(item);
+      this.editedItem = this.users[this.editedIndex];
       this.dialogDelete = true;
     },
 
     deleteItemConfirm() {
-      this.desserts.splice(this.editedIndex, 1);
+      this.users.splice(this.editedIndex, 1);
       this.closeDelete();
     },
 
@@ -262,31 +275,38 @@ export default {
     },
 
     save() {
+      this.users = [];
+
+      const auth = getAuth();
+      const db = getFirestore();
+      let messageId = "";
+
       if (this.editedIndex > -1) {
-        //Object.assign(this.desserts[this.editedIndex], this.editedItem);
-        console.log("hello");
-        const auth = getAuth();
-        const db = getFirestore();
-        const messageId = uuidv4();
-        setDoc(doc(db, "messages", messageId), {
-          id: messageId,
-          body: this.editedItem.body,
-          createdAt: new Timestamp(),
-          userId: auth.currentUser.uid,
-          replyMessages: [],
-        })
-          .then(() => {
-            console.log("llegue");
-            this.$router.push("/messages");
-          })
-          .catch((error) => {
-            this.error = error.message;
-          });
+        console.log("yey");
+        messageId = this.editedItem.id;
+        console.log(messageId);
       } else {
-        console.log("f");
-        this.desserts.push(this.editedItem);
+        messageId = uuidv4();
       }
+
+      setDoc(doc(db, "messages", messageId), {
+        id: messageId,
+        body: this.editedItem.body,
+        createdAt: Timestamp.fromDate(new Date()),
+        userId: auth.currentUser.uid,
+        replyMessages: [],
+        parent: true,
+      })
+        .then(() => {
+          //this.$router.push("/messages");
+        })
+        .catch((error) => {
+          this.error = error.message;
+        });
+
       this.close();
+
+      this.getAllMessages();
     },
   },
 };
