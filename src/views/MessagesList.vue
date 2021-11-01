@@ -7,20 +7,10 @@
         width="93vw"
         outlined
       >
-        <v-card-title>
-          <v-spacer />
-          <v-text-field
-            v-model="search"
-            append-icon="mdi-magnify"
-            label="Search"
-            single-line
-            hide-details
-          ></v-text-field>
-        </v-card-title>
         <v-data-table :headers="headers" :items="users" :search="search">
           <template v-slot:top>
             <v-toolbar flat>
-              <v-toolbar-title>Users</v-toolbar-title>
+              <v-toolbar-title>Mensajes</v-toolbar-title>
               <v-divider class="mx-4" inset vertical></v-divider>
               <v-spacer></v-spacer>
               <v-dialog v-model="dialog" max-width="500px">
@@ -32,7 +22,7 @@
                     v-bind="attrs"
                     v-on="on"
                   >
-                    Añadir usuario
+                    Nuevo mensaje
                   </v-btn>
                 </template>
                 <v-card>
@@ -43,28 +33,12 @@
                   <v-card-text>
                     <v-container>
                       <v-row>
-                        <v-col cols="12" sm="6" md="4">
-                          <v-text-field
-                            v-model="editedItem.name"
-                            label="Nombre"
-                          ></v-text-field>
-                        </v-col>
-                        <v-col cols="12" sm="6" md="4">
-                          <v-text-field
-                            v-model="editedItem.lastName"
-                            label="Apellido"
-                          ></v-text-field>
-                        </v-col>
-                        <v-col cols="12" sm="6" md="4">
-                          <v-text-field
-                            v-model="editedItem.email"
-                            label="email"
-                          ></v-text-field>
-                        </v-col>
-                        <v-col cols="12" sm="6" md="4">
-                          <v-date-picker v-model="validUntilDate" />
-                        </v-col>
-                        <v-col cols="12" sm="6" md="4"> </v-col>
+                        <v-textarea
+                          v-model="editedItem.body"
+                          label="Ingrese el nuevo mensaje"
+                          filled
+                          auto-grow
+                        ></v-textarea>
                       </v-row>
                     </v-container>
                   </v-card-text>
@@ -116,35 +90,51 @@
 
 <script>
 import { mapGetters } from "vuex";
+import { v4 as uuidv4 } from "uuid";
+import { getAuth } from "firebase/auth";
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  getFirestore,
+  getDoc,
+  doc as docc,
+  setDoc,
+  doc,
+  Timestamp,
+} from "firebase/firestore";
+
 export default {
-  name: "UsersList",
+  name: "MessagesList",
   computed: {
     formTitle() {
-      return this.editedIndex === -1 ? "Añadir usuario" : "Editar usuario";
+      return this.editedIndex === -1 ? "Crear nuevo mensaje" : "Editar mensaje";
     },
     // map `this.user` to `this.$store.getters.user`
     ...mapGetters({
       user: "user",
     }),
   },
+  mounted() {
+    this.getAllMessages();
+  },
   data() {
     return {
       search: "",
       headers: [
         {
-          text: "Nombre",
+          text: "Mensaje",
           align: "start",
-          value: "name",
+          value: "body",
         },
-        { text: "Apellido", value: "lastName" },
-        { text: "Email", value: "email" },
-        { text: "No Mensajes", value: "noMessages" },
-        { text: "Valido hasta", value: "validUntil" },
-        { text: "Activo", value: "active" },
+        { text: "Comenzado por", value: "userName" },
+        { text: "Última respuesta por", value: "lastResponse" },
+        { text: "No Respuestas", value: "noMessages" },
       ],
       editedIndex: -1,
       editedItem: {
-        name: "",
+        body: "",
         lastName: "",
         email: "",
         validUntil: "",
@@ -160,104 +150,7 @@ export default {
       )
         .toISOString()
         .substr(0, 10),
-      users: [
-        {
-          name: "Carlos ",
-          lastName: "Restrepo",
-          email: "cr1212@gmail.com",
-          noMessages: 2,
-          validUntil: "20/12/2021",
-          active: true,
-        },
-        {
-          name: "Felipe",
-          lastName: "Sanchez",
-          email: "felipe@gmail.com",
-          noMessages: 3,
-          validUntil: "12/11/2021",
-          active: false,
-        },
-        {
-          name: "Andres",
-          lastName: "Ruiz",
-          email: "ruiz@gmail.com",
-          noMessages: 8,
-          validUntil: "04/11/2022",
-          active: true,
-        },
-        {
-          name: "Carlos ",
-          lastName: "Restrepo",
-          email: "cr1212@gmail.com",
-          noMessages: 2,
-          validUntil: "20/12/2021",
-          active: true,
-        },
-        {
-          name: "Felipe",
-          lastName: "Sanchez",
-          email: "felipe@gmail.com",
-          noMessages: 3,
-          validUntil: "12/11/2021",
-          active: false,
-        },
-        {
-          name: "Andres",
-          lastName: "Ruiz",
-          email: "ruiz@gmail.com",
-          noMessages: 8,
-          validUntil: "04/11/2022",
-          active: true,
-        },
-        {
-          name: "Carlos ",
-          lastName: "Restrepo",
-          email: "cr1212@gmail.com",
-          noMessages: 2,
-          validUntil: "20/12/2021",
-          active: true,
-        },
-        {
-          name: "Felipe",
-          lastName: "Sanchez",
-          email: "felipe@gmail.com",
-          noMessages: 3,
-          validUntil: "12/11/2021",
-          active: false,
-        },
-        {
-          name: "Andres",
-          lastName: "Ruiz",
-          email: "ruiz@gmail.com",
-          noMessages: 8,
-          validUntil: "04/11/2022",
-          active: true,
-        },
-        {
-          name: "Carlos ",
-          lastName: "Restrepo",
-          email: "cr1212@gmail.com",
-          noMessages: 2,
-          validUntil: "20/12/2021",
-          active: true,
-        },
-        {
-          name: "Felipe",
-          lastName: "Sanchez",
-          email: "felipe@gmail.com",
-          noMessages: 3,
-          validUntil: "12/11/2021",
-          active: false,
-        },
-        {
-          name: "Andres",
-          lastName: "Ruiz",
-          email: "ruiz@gmail.com",
-          noMessages: 8,
-          validUntil: "04/11/2022",
-          active: true,
-        },
-      ],
+      users: [],
     };
   },
   watch: {
@@ -274,6 +167,67 @@ export default {
   },
 
   methods: {
+    getAllMessages() {
+      const db = getFirestore();
+
+      const q = query(collection(db, "messages"), where("parent", "==", true));
+
+      getDocs(q)
+        .then((doc) => {
+          doc.docs.forEach((element) => {
+            getDoc(docc(db, "users", element.data().userId))
+              .then((userr) => {
+                const nombre_usuario =
+                  userr.data().name + " " + userr.data().lastName;
+
+                console.log(element.data().replyMessages.length);
+
+                let lastResponseId = "Sin respuestas";
+
+                if (element.data().replyMessages.length > 0) {
+                  lastResponseId =
+                    element.data().replyMessages[
+                      element.data().replyMessages.length - 1
+                    ];
+                }
+
+                getDoc(docc(db, "messages", lastResponseId))
+                  .then((last_message) => {
+                    if (last_message.exists()) {
+                      const userr2Id = last_message.data().userId;
+
+                      getDoc(docc(db, "users", userr2Id))
+                        .then((userr2) => {
+                          const message = {
+                            body: element.data().body,
+                            userName: nombre_usuario,
+                            lastResponse:
+                              userr2.data().name + " " + userr2.data().lastName,
+                            noMessages: element.data().replyMessages.length,
+                          };
+
+                          this.users.push(message);
+                        })
+                        .catch();
+                    } else {
+                      const message = {
+                        body: element.data().body,
+                        userName: nombre_usuario,
+                        lastResponse: "--",
+                        noMessages: element.data().replyMessages.length,
+                      };
+
+                      this.users.push(message);
+                    }
+                  })
+                  .catch();
+              })
+              .catch();
+          });
+        })
+        .catch();
+    },
+
     editItem(item) {
       this.editedIndex = this.desserts.indexOf(item);
       this.editedItem = Object.assign({}, item);
@@ -309,8 +263,27 @@ export default {
 
     save() {
       if (this.editedIndex > -1) {
-        Object.assign(this.desserts[this.editedIndex], this.editedItem);
+        //Object.assign(this.desserts[this.editedIndex], this.editedItem);
+        console.log("hello");
+        const auth = getAuth();
+        const db = getFirestore();
+        const messageId = uuidv4();
+        setDoc(doc(db, "messages", messageId), {
+          id: messageId,
+          body: this.editedItem.body,
+          createdAt: new Timestamp(),
+          userId: auth.currentUser.uid,
+          replyMessages: [],
+        })
+          .then(() => {
+            console.log("llegue");
+            this.$router.push("/messages");
+          })
+          .catch((error) => {
+            this.error = error.message;
+          });
       } else {
+        console.log("f");
         this.desserts.push(this.editedItem);
       }
       this.close();

@@ -3,6 +3,7 @@ import Router from 'vue-router';
 import Login from './views/Login';
 import UserProfile from './views/user/UserProfile';
 import UsersList from './views/UsersList';
+import MessagesList from './views/MessagesList';
 
 
 Vue.use(Router)
@@ -25,6 +26,12 @@ export default new Router({
       path:'/users',
       name: 'users-list',
       component: UsersList,
+      
+    },
+    {
+      path:'/messages',
+      name: 'messages-list',
+      component: MessagesList,
       
     },
   ]
