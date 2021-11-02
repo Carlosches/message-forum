@@ -207,6 +207,7 @@ import {
   doc,
   Timestamp,
   deleteDoc,
+  //orderBy,
 } from "firebase/firestore";
 
 export default {
@@ -259,6 +260,11 @@ export default {
         { text: "Acciones", value: "actions" },
         { text: "Id", value: "id", align: " d-none" },
       ],
+      parentMessage: {
+        referenceId: "",
+        referenceBody: "",
+      },
+
       editedIndex: -1,
       editedItem: {
         id: "",
@@ -294,7 +300,7 @@ export default {
 
   methods: {
     getAllMessages() {
-      this.users.length = 0;
+      this.users = [];
       const db = getFirestore();
 
       const q = query(collection(db, "messages"), where("parent", "==", true));
@@ -304,7 +310,7 @@ export default {
           doc.docs.forEach((element) => {
             getDoc(docc(db, "users", element.data().userId))
               .then((userr) => {
-                const nombre_usuario =
+                const nombre_usuario = //"hola";
                   userr.data().name + " " + userr.data().lastName;
 
                 let lastResponseId = "Sin respuestas";
@@ -415,6 +421,9 @@ export default {
 
     expandRow(item, slot) {
       this.subitems = [];
+      this.parentMessage.referenceId = item.id;
+      this.parentMessage.referenceBody = item.body;
+      //console.log(this.referenceId);
 
       slot.expand(!slot.isExpanded);
 
@@ -441,17 +450,30 @@ export default {
     },
 
     delete() {
+      this.users = [];
       const auth = getAuth();
       const db = getFirestore();
 
       const user_id = auth.currentUser.uid;
+      const message_delete = this.editedItem.id;
 
-      getDoc(doc(db, "messages", this.editedItem.id)).then((message) => {
+      getDoc(doc(db, "messages", message_delete)).then((message) => {
         if (
           message.data().replyMessages.length < 1 &&
           user_id == message.data().userId
         ) {
-          this.users = [];
+          getDoc(doc(db, "users", user_id)).then((user) => {
+            const arr = user.data().messages;
+            const index = arr.indexOf(message_delete);
+            arr.splice(index, 1);
+            setDoc(doc(db, "users", user_id), {
+              id: user_id,
+              email: user.data().email,
+              name: user.data().name,
+              lastName: user.data().lastName,
+              messages: arr,
+            }).then();
+          });
 
           deleteDoc(doc(db, "messages", message.data().id)).then(() => {
             this.getAllMessages();
@@ -463,20 +485,52 @@ export default {
     },
 
     delete2() {
+      this.subitems = [];
       const auth = getAuth();
       const db = getFirestore();
 
       const user_id = auth.currentUser.uid;
+      const message_delete = this.editedItem.id;
 
-      getDoc(doc(db, "messages", this.editedItem.id)).then((message) => {
+      const parent_message = this.parentMessage.referenceId;
+      //const parent_body = this.parentMessage.referenceBody;
+
+      getDoc(doc(db, "messages", message_delete)).then((message) => {
         if (
           message.data().replyMessages.length < 1 &&
           user_id == message.data().userId
         ) {
-          this.subitems = [];
+          getDoc(doc(db, "users", user_id)).then((user) => {
+            const arr = user.data().messages;
+            const index = arr.indexOf(message_delete);
+            arr.splice(index, 1);
 
-          deleteDoc(doc(db, "messages", message.data().id)).then(() => {
-            this.getAllMessages();
+            setDoc(doc(db, "users", user_id), {
+              id: user_id,
+              email: user.data().email,
+              name: user.data().name,
+              lastName: user.data().lastName,
+              messages: arr,
+            }).then(() => {
+              getDoc(doc(db, "messages", parent_message)).then((pMessage) => {
+                const arr = pMessage.data().replyMessages;
+                const index = arr.indexOf(message_delete);
+                arr.splice(index, 1);
+
+                setDoc(doc(db, "messages", parent_message), {
+                  id: parent_message,
+                  body: pMessage.data().body,
+                  createdAt: pMessage.data().createdAt,
+                  userId: pMessage.data().userId,
+                  replyMessages: arr,
+                  parent: true,
+                }).then(() => {
+                  deleteDoc(doc(db, "messages", message.data().id)).then(() => {
+                    this.getAllMessages();
+                  });
+                });
+              });
+            });
           });
         } else {
           console.log("negativo");
@@ -561,37 +615,100 @@ export default {
     },
 
     save2() {
-      this.subitems = [];
       this.users = [];
 
       const auth = getAuth();
       const db = getFirestore();
+      const user_id = auth.currentUser.uid;
       let messageId = "";
+      let messageBody = "";
 
       if (this.editedIndex > -1) {
         messageId = this.editedItem.id;
+        messageBody = this.editedItem.body;
+
+        getDoc(doc(db, "messages", messageId)).then((message) => {
+          if (user_id == message.data().userId) {
+            setDoc(doc(db, "messages", messageId), {
+              id: messageId,
+              body: messageBody,
+              createdAt: Timestamp.fromDate(new Date()),
+              userId: auth.currentUser.uid,
+              replyMessages: message.data().replyMessages,
+              parent: false,
+            })
+              .then(() => {
+                this.getAllMessages();
+              })
+              .catch((error) => {
+                this.error = error.message;
+              });
+          } else {
+            console.log("negativo");
+          }
+        });
       } else {
         messageId = uuidv4();
+
+        const parent_message = this.parentMessage.referenceId;
+        const parent_body = this.parentMessage.referenceBody;
+
+        setDoc(doc(db, "messages", messageId), {
+          id: messageId,
+          body: this.editedItem.body,
+          createdAt: Timestamp.fromDate(new Date()),
+          userId: auth.currentUser.uid,
+          replyMessages: [],
+          parent: false,
+        })
+          .then(() => {
+            getDoc(doc(db, "messages", parent_message)).then((message) => {
+              const arr = message.data().replyMessages;
+              arr.push(messageId);
+
+              setDoc(doc(db, "messages", parent_message), {
+                id: parent_message,
+                body: parent_body,
+                createdAt: Timestamp.fromDate(new Date()),
+                userId: auth.currentUser.uid,
+                replyMessages: arr,
+                parent: true,
+              })
+                .then(() => {
+                  //this.$router.push("/messages");
+                  this.getAllMessages();
+                })
+                .catch((error) => {
+                  this.error = error.message;
+                });
+            });
+          })
+          .catch((error) => {
+            this.error = error.message;
+          });
+
+        getDoc(doc(db, "users", auth.currentUser.uid)).then((user) => {
+          const arr = user.data().messages;
+          arr.push(messageId);
+
+          setDoc(doc(db, "users", auth.currentUser.uid), {
+            id: auth.currentUser.uid,
+            email: user.data().email,
+            name: user.data().name,
+            lastName: user.data().lastName,
+            messages: arr,
+          })
+            .then(() => {
+              //this.$router.push("/messages");
+              //this.getAllMessages();
+            })
+            .catch((error) => {
+              this.error = error.message;
+            });
+        });
       }
 
-      setDoc(doc(db, "messages", messageId), {
-        id: messageId,
-        body: this.editedItem.body,
-        createdAt: Timestamp.fromDate(new Date()),
-        userId: auth.currentUser.uid,
-        replyMessages: [],
-        parent: false,
-      })
-        .then(() => {
-          //this.$router.push("/messages");
-        })
-        .catch((error) => {
-          this.error = error.message;
-        });
-
       this.close();
-
-      this.getAllMessages();
     },
   },
 };
