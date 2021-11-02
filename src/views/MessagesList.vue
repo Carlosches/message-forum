@@ -183,7 +183,9 @@
           </template>
           <!-- ------------------------------------------------------------------------------ -->
           <template v-slot:no-data>
-            <v-btn color="primary" @click="getAllMessages"> Reset </v-btn>
+            <v-btn color="primary" @click="getAllMessages">
+              Cargar de nuevo
+            </v-btn>
           </template>
         </v-data-table>
       </v-card>
@@ -248,6 +250,7 @@ export default {
         { text: "Acciones", value: "actions", width: "10%" },
         { text: "", value: "data-table-expand", align: " d-none" },
         { text: "Id", value: "id", align: " d-none" },
+        { text: "UserId", value: "userId", align: " d-none" },
       ],
 
       subheaders: [
@@ -263,6 +266,7 @@ export default {
       parentMessage: {
         referenceId: "",
         referenceBody: "",
+        referenceUserId: "",
       },
 
       editedIndex: -1,
@@ -337,6 +341,7 @@ export default {
                               userr2.data().name + " " + userr2.data().lastName,
                             noMessages: element.data().replyMessages.length,
                             posted: element.data().createdAt,
+                            userId: element.data().userId,
                           };
                           //console.log(message.id);
 
@@ -423,6 +428,7 @@ export default {
       this.subitems = [];
       this.parentMessage.referenceId = item.id;
       this.parentMessage.referenceBody = item.body;
+      this.parentMessage.referenceUserId = item.userId;
       //console.log(this.referenceId);
 
       slot.expand(!slot.isExpanded);
@@ -494,21 +500,21 @@ export default {
       console.log(message_delete);
 
       const parent_message = this.parentMessage.referenceId;
-      //const parent_body = this.parentMessage.referenceBody;
+      const parent_user = this.parentMessage.referenceUserId;
 
       getDoc(doc(db, "messages", message_delete)).then((message) => {
         if (
           message.data().replyMessages.length < 1 &&
           user_id == message.data().userId
         ) {
-          getDoc(doc(db, "users", user_id)).then((user) => {
+          getDoc(doc(db, "users", parent_user)).then((user) => {
             const arr = user.data().messages;
             console.log(message_delete);
             const index = arr.indexOf(message_delete);
             arr.splice(index, 1);
 
-            setDoc(doc(db, "users", user_id), {
-              id: user_id,
+            setDoc(doc(db, "users", parent_user), {
+              id: parent_user,
               email: user.data().email,
               name: user.data().name,
               lastName: user.data().lastName,
@@ -656,6 +662,8 @@ export default {
 
         const parent_message = this.parentMessage.referenceId;
         const parent_body = this.parentMessage.referenceBody;
+        const parent_user = this.parentMessage.referenceUserId;
+        //console.log(parent_user);
 
         setDoc(doc(db, "messages", messageId), {
           id: messageId,
@@ -668,13 +676,14 @@ export default {
           .then(() => {
             getDoc(doc(db, "messages", parent_message)).then((message) => {
               const arr = message.data().replyMessages;
+              //console.log(messageId);
               arr.push(messageId);
 
               setDoc(doc(db, "messages", parent_message), {
                 id: parent_message,
                 body: parent_body,
-                createdAt: Timestamp.fromDate(new Date()),
-                userId: auth.currentUser.uid,
+                createdAt: message.data().createdAt,
+                userId: parent_user,
                 replyMessages: arr,
                 parent: true,
               })
