@@ -103,6 +103,7 @@ import {
   setDoc,
   doc,
   Timestamp,
+  deleteDoc,
 } from "firebase/firestore";
 
 export default {
@@ -235,27 +236,26 @@ export default {
           });
         })
         .catch();
+      //console.log(this.users);
     },
 
     editItem(item) {
-      console.log(item);
       this.editedIndex = this.users.indexOf(item);
-      //console.log("index " + this.users[this.editedIndex]);
       this.editedItem = this.users[this.editedIndex];
       this.dialog = true;
-      console.log(this.users);
-      //this.save();
     },
 
     deleteItem(item) {
+      console.log(item);
       this.editedIndex = this.users.indexOf(item);
       this.editedItem = this.users[this.editedIndex];
       this.dialogDelete = true;
     },
 
     deleteItemConfirm() {
-      this.users.splice(this.editedIndex, 1);
+      //this.users.splice(this.editedIndex, 1);
       this.closeDelete();
+      this.delete();
     },
 
     close() {
@@ -274,6 +274,28 @@ export default {
       });
     },
 
+    delete() {
+      const auth = getAuth();
+      const db = getFirestore();
+
+      const user_id = auth.currentUser.uid;
+
+      getDoc(doc(db, "messages", this.editedItem.id)).then((message) => {
+        if (
+          message.data().replyMessages.length < 1 &&
+          user_id == message.data().userId
+        ) {
+          this.users = [];
+
+          deleteDoc(doc(db, "messages", message.data().id)).then(() => {
+            this.getAllMessages();
+          });
+        } else {
+          console.log("negativo");
+        }
+      });
+    },
+
     save() {
       this.users = [];
 
@@ -282,9 +304,7 @@ export default {
       let messageId = "";
 
       if (this.editedIndex > -1) {
-        console.log("yey");
         messageId = this.editedItem.id;
-        console.log(messageId);
       } else {
         messageId = uuidv4();
       }
