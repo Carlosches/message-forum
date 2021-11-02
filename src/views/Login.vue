@@ -109,7 +109,7 @@
 
                           <v-text-field
                             id="password"
-                            label="contraseña"
+                            label="contraseña (más de 6 caracteres)"
                             name="password"
                             prepend-icon="mdi-lock"
                             type="password"
@@ -209,6 +209,7 @@ export default {
             name: this.userToRegister.name,
             lastName: this.userToRegister.lastName,
             email: this.userToRegister.email,
+            messages:[]
           })
             .then(() => {
               this.$router.push("/users");
@@ -218,7 +219,7 @@ export default {
             });
         })
         .catch((error) => {
-          this.error = error.message;
+          console.log(error.message);
         });
     },
   },
