@@ -388,7 +388,7 @@ export default {
     deleteItem2(item) {
       this.editedIndex = this.subitems.indexOf(item);
       this.editedItem = this.subitems[this.editedIndex];
-      this.dialogDelete = true;
+      this.dialogDelete2 = true;
     },
 
     deleteItemConfirm() {
@@ -491,6 +491,7 @@ export default {
 
       const user_id = auth.currentUser.uid;
       const message_delete = this.editedItem.id;
+      console.log(message_delete);
 
       const parent_message = this.parentMessage.referenceId;
       //const parent_body = this.parentMessage.referenceBody;
@@ -502,6 +503,7 @@ export default {
         ) {
           getDoc(doc(db, "users", user_id)).then((user) => {
             const arr = user.data().messages;
+            console.log(message_delete);
             const index = arr.indexOf(message_delete);
             arr.splice(index, 1);
 
@@ -514,8 +516,9 @@ export default {
             }).then(() => {
               getDoc(doc(db, "messages", parent_message)).then((pMessage) => {
                 const arr = pMessage.data().replyMessages;
-                const index = arr.indexOf(message_delete);
-                arr.splice(index, 1);
+                console.log(message_delete);
+                const index2 = arr.indexOf(message_delete);
+                arr.splice(index2, 1);
 
                 setDoc(doc(db, "messages", parent_message), {
                   id: parent_message,
@@ -525,7 +528,8 @@ export default {
                   replyMessages: arr,
                   parent: true,
                 }).then(() => {
-                  deleteDoc(doc(db, "messages", message.data().id)).then(() => {
+                  console.log(message_delete);
+                  deleteDoc(doc(db, "messages", message_delete)).then(() => {
                     this.getAllMessages();
                   });
                 });
