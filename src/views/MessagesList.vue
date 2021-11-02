@@ -294,6 +294,13 @@ export default {
         lastResponse: "",
         noMessages: "",
       },
+      editedItemAux: {
+        id: "",
+        body: "",
+        userName: "",
+        lastResponse: "",
+        noMessages: "",
+      },
       defaultItem: {
         id: "",
         body: "",
@@ -398,6 +405,7 @@ export default {
     },
     editItem(item) {
       //console.log("hello");
+      this.editedItemAux = Object.assign({}, this.editedItem);
       this.editedIndex = this.users.indexOf(item);
       this.editedItem = this.users[this.editedIndex];
       this.dialog = true;
@@ -435,11 +443,10 @@ export default {
     close() {
       this.dialog = false;
       this.dialog2 = false;
-
+      //this.editedItem = Object.assign({}, this.editedItemAux);
       this.$nextTick(() => {
         this.editedItem = Object.assign({}, this.defaultItem);
         this.editedIndex = -1;
-        //this.getAllMessages();
       });
     },
 
