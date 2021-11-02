@@ -79,6 +79,21 @@
                   </v-card-actions>
                 </v-card>
               </v-dialog>
+              <v-dialog v-model="warningDialog" max-width="500px">
+                <v-card>
+                  <v-card-title class="text-h5"
+                    >No puede manipular este mensaje</v-card-title
+                  >
+                  <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="red darken-1" text @click="closeW"
+                      >Cerrar</v-btn
+                    >
+
+                    <v-spacer></v-spacer>
+                  </v-card-actions>
+                </v-card>
+              </v-dialog>
             </v-toolbar>
           </template>
           <template v-slot:[`item.actions`]="{ item }">
@@ -209,6 +224,7 @@ import {
   doc,
   Timestamp,
   deleteDoc,
+  orderBy,
   //orderBy,
 } from "firebase/firestore";
 
@@ -236,6 +252,7 @@ export default {
       dialogDelete: false,
       dialog2: false,
       dialogDelete2: false,
+      warningDialog: false,
 
       headers: [
         {
@@ -307,7 +324,11 @@ export default {
       this.users = [];
       const db = getFirestore();
 
-      const q = query(collection(db, "messages"), where("parent", "==", true));
+      const q = query(
+        collection(db, "messages"),
+        where("parent", "==", true),
+        orderBy("createdAt")
+      );
 
       getDocs(q)
         .then((doc) => {
@@ -317,6 +338,7 @@ export default {
                 const nombre_usuario = //"hola";
                   userr.data().name + " " + userr.data().lastName;
 
+                console.log(element.data().id);
                 let lastResponseId = "Sin respuestas";
 
                 if (element.data().replyMessages.length > 0) {
@@ -343,7 +365,7 @@ export default {
                             posted: element.data().createdAt,
                             userId: element.data().userId,
                           };
-                          //console.log(message.id);
+                          console.log(message.id);
 
                           this.users.push(message);
                         })
@@ -356,8 +378,9 @@ export default {
                         lastResponse: "--",
                         noMessages: element.data().replyMessages.length,
                         posted: element.data().createdAt,
+                        userId: element.data().userId,
                       };
-
+                      console.log(message.id);
                       this.users.push(message);
                     }
                   })
@@ -370,6 +393,9 @@ export default {
       //console.log(this.users);
     },
 
+    warningD() {
+      this.warningDialog = true;
+    },
     editItem(item) {
       //console.log("hello");
       this.editedIndex = this.users.indexOf(item);
@@ -409,9 +435,11 @@ export default {
     close() {
       this.dialog = false;
       this.dialog2 = false;
+
       this.$nextTick(() => {
         this.editedItem = Object.assign({}, this.defaultItem);
         this.editedIndex = -1;
+        //this.getAllMessages();
       });
     },
 
@@ -422,6 +450,10 @@ export default {
         this.editedItem = Object.assign({}, this.defaultItem);
         this.editedIndex = -1;
       });
+    },
+
+    closeW() {
+      this.warningDialog = false;
     },
 
     expandRow(item, slot) {
@@ -486,6 +518,8 @@ export default {
           });
         } else {
           console.log("negativo");
+          this.warningD();
+          this.getAllMessages();
         }
       });
     },
@@ -544,6 +578,7 @@ export default {
           });
         } else {
           console.log("negativo");
+          this.warningD();
         }
       });
     },
@@ -579,6 +614,7 @@ export default {
               });
           } else {
             console.log("negativo");
+            this.warningD();
           }
         });
       } else {
@@ -655,6 +691,7 @@ export default {
               });
           } else {
             console.log("negativo");
+            this.warningD();
           }
         });
       } else {
@@ -663,7 +700,7 @@ export default {
         const parent_message = this.parentMessage.referenceId;
         const parent_body = this.parentMessage.referenceBody;
         const parent_user = this.parentMessage.referenceUserId;
-        //console.log(parent_user);
+        console.log(parent_user);
 
         setDoc(doc(db, "messages", messageId), {
           id: messageId,
@@ -688,8 +725,30 @@ export default {
                 parent: true,
               })
                 .then(() => {
-                  //this.$router.push("/messages");
-                  this.getAllMessages();
+                  getDoc(doc(db, "users", auth.currentUser.uid)).then(
+                    (userr) => {
+                      console.log(userr);
+                      const arr = userr.data().messages;
+                      arr.push(messageId);
+
+                      setDoc(doc(db, "users", auth.currentUser.uid), {
+                        id: auth.currentUser.uid,
+                        email: userr.data().email,
+                        name: userr.data().name,
+                        lastName: userr.data().lastName,
+                        messages: arr,
+                      })
+                        .then(() => {
+                          //this.$router.push("/messages");
+                          this.getAllMessages();
+                        })
+                        .catch((error) => {
+                          this.error = error.message;
+                        });
+                    }
+                  );
+
+                  //this.getAllMessages();
                 })
                 .catch((error) => {
                   this.error = error.message;
@@ -699,26 +758,6 @@ export default {
           .catch((error) => {
             this.error = error.message;
           });
-
-        getDoc(doc(db, "users", auth.currentUser.uid)).then((user) => {
-          const arr = user.data().messages;
-          arr.push(messageId);
-
-          setDoc(doc(db, "users", auth.currentUser.uid), {
-            id: auth.currentUser.uid,
-            email: user.data().email,
-            name: user.data().name,
-            lastName: user.data().lastName,
-            messages: arr,
-          })
-            .then(() => {
-              //this.$router.push("/messages");
-              //this.getAllMessages();
-            })
-            .catch((error) => {
-              this.error = error.message;
-            });
-        });
       }
 
       this.close();

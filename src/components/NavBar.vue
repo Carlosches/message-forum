@@ -10,7 +10,9 @@
               ></v-img>
             </v-list-item-avatar>
             <v-list-item-content>
-              <v-list-item-subtitle>{{user.loggedIn? user.data.email:""}}</v-list-item-subtitle>
+              <v-list-item-subtitle>{{
+                user.loggedIn ? user.data.email : ""
+              }}</v-list-item-subtitle>
             </v-list-item-content>
           </v-list-item>
         </v-list>
@@ -30,13 +32,6 @@
               <v-icon>mdi-android-messages</v-icon>
             </v-list-item-icon>
             <v-list-item-title>Mensajes</v-list-item-title>
-          </v-list-item>
-
-          <v-list-item link>
-            <v-list-item-icon>
-              <v-icon>mdi-comment-account-outline </v-icon>
-            </v-list-item-icon>
-            <v-list-item-title>Mis mensajes</v-list-item-title>
           </v-list-item>
 
           <v-list-item @click="singOutUser()">
