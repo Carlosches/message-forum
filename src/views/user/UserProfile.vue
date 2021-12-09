@@ -3,7 +3,8 @@
     <v-row style="height: 70vh;" class="text-center" align="center" justify="center">
       <v-col>
         <div class="d-inline-flex justify-center">
-          <v-card v-if="user" class="pa-5" outlined>
+          <!-- v-if="user" -->
+          <v-card  class="pa-5" outlined>
             <v-container fluid>
               <v-row align="center" justify="center">
                   <div slot="activator">
@@ -20,7 +21,7 @@
               </v-row>
               <v-row align="center" justify="center">
                 <v-chip @click="editProfile" small>
-                  Edit profile <v-icon class="icon ml-2" x-small>fa-pen</v-icon>
+                  Edit password <v-icon class="icon ml-2" x-small>fa-pen</v-icon>
                 </v-chip>
               </v-row>
               <v-divider class="my-7"/>
@@ -29,7 +30,6 @@
                     <!--<b>Username:</b> {{ this.$store.state.user.username }}<br>
                     <b>Automation Token:</b> {{ this.$store.state.user.details.automationToken }}-->
                     <b>Username:</b> sand<br>
-                    <b>email:</b> san2@gmail.com
 
                   </p>
               </v-row>

@@ -140,13 +140,13 @@
 </template>
 
 <script>
-import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-} from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
-import { setDoc, doc } from "firebase/firestore";
+// import {
+//   getAuth,
+//   createUserWithEmailAndPassword,
+//   signInWithEmailAndPassword,
+// } from "firebase/auth";
+// import { getFirestore } from "firebase/firestore";
+// import { setDoc, doc } from "firebase/firestore";
 //import MD5 from "crypto-js/md5"; comentado para evitar errores
 
 export default {
@@ -167,60 +167,61 @@ export default {
   }),
   methods: {
     sigIn() {
-      const auth = getAuth();
+      // const auth = getAuth();
 
-      //const hash_password = MD5(this.userToLogIn.password).toString;
-      // no la uso aun porque las cuentas actuales tienen las contraseñas sin hash
+      // //const hash_password = MD5(this.userToLogIn.password).toString;
+      // // no la uso aun porque las cuentas actuales tienen las contraseñas sin hash
 
-      signInWithEmailAndPassword(
-        auth,
-        this.userToLogIn.email,
-        this.userToLogIn.password
-      )
-        .then((userCredential) => {
-          // Signed in
-          const user = userCredential.user;
-          console.log(user);
-          this.$router.push("/users");
-          // ...
-        })
-        .catch((error) => {
-          this.error = error.message;
-        });
+      // signInWithEmailAndPassword(
+      //   auth,
+      //   this.userToLogIn.email,
+      //   this.userToLogIn.password
+      // )
+      //   .then((userCredential) => {
+      //     // Signed in
+      //     const user = userCredential.user;
+      //     console.log(user);
+      //     this.$router.push("/users");
+      //     // ...
+      //   })
+      //   .catch((error) => {
+      //     this.error = error.message;
+      //   });
+      this.$router.push("/users");
     },
     singUp() {
-      const auth = getAuth();
+      // const auth = getAuth();
 
-      //const hash_password = MD5(this.userToLogIn.password).toString;
+      // //const hash_password = MD5(this.userToLogIn.password).toString;
 
-      createUserWithEmailAndPassword(
-        auth,
-        this.userToRegister.email,
-        this.userToRegister.password
-      )
-        .then((userCredential) => {
-          // Signed in
-          const user = userCredential.user;
-          console.log(user);
-          const db = getFirestore();
+      // createUserWithEmailAndPassword(
+      //   auth,
+      //   this.userToRegister.email,
+      //   this.userToRegister.password
+      // )
+      //   .then((userCredential) => {
+      //     // Signed in
+      //     const user = userCredential.user;
+      //     console.log(user);
+      //     const db = getFirestore();
 
-          setDoc(doc(db, "users", user.uid), {
-            id: user.uid,
-            name: this.userToRegister.name,
-            lastName: this.userToRegister.lastName,
-            email: this.userToRegister.email,
-            messages:[]
-          })
-            .then(() => {
-              this.$router.push("/users");
-            })
-            .catch((error) => {
-              this.error = error.message;
-            });
-        })
-        .catch((error) => {
-          console.log(error.message);
-        });
+      //     setDoc(doc(db, "users", user.uid), {
+      //       id: user.uid,
+      //       name: this.userToRegister.name,
+      //       lastName: this.userToRegister.lastName,
+      //       email: this.userToRegister.email,
+      //       messages:[]
+      //     })
+      //       .then(() => {
+      //         this.$router.push("/users");
+      //       })
+      //       .catch((error) => {
+      //         this.error = error.message;
+      //       });
+      //   })
+      //   .catch((error) => {
+      //     console.log(error.message);
+      //   });
     },
   },
 };

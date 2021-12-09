@@ -1,6 +1,7 @@
  <template>
   <div>
-    <v-card  v-if="user.loggedIn">
+    <!-- v-if="user.loggedIn" -->
+    <v-card  >
       <v-navigation-drawer expand-on-hover fixed permanent  >
         <v-list>
           <v-list-item class="px-2" link @click="goToProfile()">
@@ -21,13 +22,14 @@
           nav
           dense
         >
-          <v-list-item @click="goToUsers()">
+        <!-- v-if="user.loggedIn" -->
+          <v-list-item  @click="goToUsers()">
             <v-list-item-icon>
               <v-icon>mdi-account-group</v-icon>
             </v-list-item-icon>
             <v-list-item-title>Usuarios</v-list-item-title>
           </v-list-item>
-          <v-list-item link>
+          <!-- <v-list-item link>
             <v-list-item-icon>
               <v-icon>mdi-android-messages</v-icon>
             </v-list-item-icon>
@@ -38,13 +40,13 @@
               <v-icon>mdi-comment-account-outline </v-icon>
             </v-list-item-icon>
             <v-list-item-title>Mis mensajes</v-list-item-title>
-          </v-list-item>
+          </v-list-item>-->
           <v-list-item @click="singOutUser()">
             <v-list-item-icon>
               <v-icon>mdi-logout </v-icon>
             </v-list-item-icon>
             <v-list-item-title>Salir</v-list-item-title>
-          </v-list-item>
+          </v-list-item> 
         </v-list>
       </v-navigation-drawer>
     </v-card>
@@ -55,7 +57,7 @@
 <script>
 
 import { mapGetters } from "vuex";
-import { getAuth, signOut } from "firebase/auth";
+// import { getAuth, signOut } from "firebase/auth";
 export default {
     name:'NavBar',
     computed:{
@@ -77,12 +79,12 @@ export default {
             this.$router.push('/profile')
         },
         singOutUser(){
-        const auth = getAuth();
-        signOut(auth).then(() => {
+        // const auth = getAuth();
+        // signOut(auth).then(() => {
           this.$router.push("/");
-        }).catch((error) => {
-          this.error = error.message;
-        });
+        // }).catch((error) => {
+        //   this.error = error.message;
+        // });
       }
     }
 }
